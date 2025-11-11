@@ -1,0 +1,15 @@
+.env
+
+# progs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# build output
+/bin/
+/pkg/
+
+# temp files and logs
+*.log
+*.tmp
