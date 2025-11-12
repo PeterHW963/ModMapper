@@ -1,4 +1,4 @@
-module exchange-mapping-site/server
+module modmapper/server
 
 go 1.24.1
 
