@@ -7,6 +7,7 @@ import (
 	"log"
 	"modmapper/server/internal/platform/config"
 	"modmapper/server/internal/platform/database"
+	"modmapper/server/internal/universities"
 	"net"
 	"net/http"
 	"os"
@@ -42,6 +43,13 @@ func run() error {
 	defer pool.Close()
 
 	mux := http.NewServeMux()
+
+	universityRepository := universities.NewRepository(pool)
+	universityService := universities.NewService(universityRepository)
+	universityHandler := universities.NewHandler(universityService)
+
+	universityHandler.RegisterRoutes(mux)
+
 	// health check to see if http server is running
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -73,7 +81,7 @@ func run() error {
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
-		IdleTimeout:       60 * time.Second, // keep-alive conn is closed after this
+		IdleTimeout:       60 * time.Second, // keep-alive timeout
 	}
 
 	// listen for any termination signal
@@ -106,7 +114,7 @@ func run() error {
 		defer cancelShutdown()
 
 		if err := server.Shutdown(shutdownCtx); err != nil {
-			_ = server.Close() // force close instead of graceful shutdown
+			_ = server.Close() // force close
 			return err
 		}
 
