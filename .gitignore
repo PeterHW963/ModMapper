@@ -1,3 +1,6 @@
 *.txt
+!scripts/requirements-web.txt
+
 .env
-data/*
+data/generated
+data/raw
