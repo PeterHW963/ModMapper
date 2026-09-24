@@ -45,16 +45,28 @@ If you choose to name the files in some other way, you may do the following:
 python .\scripts\extract_universities_web.py --html <input filepath> --output <output filepath>
 ```
 
-## 4. Import the reviewed CSV
+## 4. Remove listed duplicates and add local universities
 
-The importer defaults to a different location, so pass the path explicitly from
-`<root>\server`:
+From project root, run:
 
 ```powershell
-go run ./cmd/import-universities -csv ../data/generated/universities.csv -env ../.env
+python .\scripts\prepare_universities.py
 ```
 
-or if you placed the genearated csv file and env files differently:
+The script reads `data/generated/universities.csv`, removes entries in `TO_REMOVE`,
+and adds `MANUAL_UNIVERSITIES`.
+Update `TO_REMOVE` when more duplicates are identified (can use LLMs to help check for duplicates in `universities.csv` file).
+The output is `data/generated/university-refined.csv` with `name,country` columns.
+
+## 5. Import the prepared CSV
+
+From `<root>\server`:
+
+```powershell
+go run ./cmd/import-universities -csv ../data/generated/university-refined.csv -env ../.env
+```
+
+or if you placed the generated CSV and env files differently:
 
 ```powershell
 go run ./cmd/import-universities -csv <csv filepath> -env <env filepath>

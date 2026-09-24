@@ -52,7 +52,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 			})
 
 		case errors.Is(err, context.DeadlineExceeded):
-			log.Printf("university lookup timed out: %w", err)
+			log.Printf("university lookup timed out: %v", err)
 			writeJSON(w, http.StatusServiceUnavailable, map[string]string{
 				"error": "university lookup timed out",
 			})
@@ -62,7 +62,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 			return
 
 		default:
-			log.Printf("failed to list universities: %w", err)
+			log.Printf("failed to list universities: %v", err)
 			writeJSON(w, http.StatusInternalServerError, map[string]string{
 				"error": "failed to retrieve universities",
 			})
@@ -92,6 +92,6 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("failed to write JSON response: %w", err)
+		log.Printf("failed to write JSON response: %v", err)
 	}
 }

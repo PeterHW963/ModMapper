@@ -4,3 +4,5 @@
 .env
 data/generated
 data/raw
+
+__pycache__
