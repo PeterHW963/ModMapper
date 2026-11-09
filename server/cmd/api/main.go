@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"modmapper/server/internal/modules"
 	"modmapper/server/internal/platform/config"
 	"modmapper/server/internal/platform/database"
 	"modmapper/server/internal/universities"
@@ -48,7 +49,12 @@ func run() error {
 	universityService := universities.NewService(universityRepository)
 	universityHandler := universities.NewHandler(universityService)
 
+	moduleRepository := modules.NewRepository(pool)
+	moduleService := modules.NewService(moduleRepository, universityRepository)
+	moduleHandler := modules.NewHandler(moduleService)
+
 	universityHandler.RegisterRoutes(mux)
+	moduleHandler.RegisterRoutes(mux)
 
 	// health check to see if http server is running
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {

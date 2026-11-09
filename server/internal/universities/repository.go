@@ -55,3 +55,17 @@ func (r *Repository) List(
 
 	return universities, nil
 }
+
+func (r *Repository) Exists(
+	ctx context.Context,
+	id string,
+) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM universities WHERE id = $1)", id).Scan(&exists)
+
+	if err != nil {
+		return false, fmt.Errorf("failed to check university: %w", err)
+	}
+
+	return exists, nil
+}
