@@ -31,7 +31,7 @@ func (r *Repository) List(
 				OR strpos(lower(title), lower($2)) > 0 
 			)
 			ORDER BY code, id
-			LIMIT $3, OFFSET $4
+			LIMIT $3 OFFSET $4
 	`
 
 	rows, err := r.pool.Query(

@@ -1,6 +1,8 @@
 *.txt
 !scripts/requirements-web.txt
 
+.vscode
+
 .env
 data/generated
 data/raw
