@@ -2,12 +2,13 @@ package universities
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
+
+	"modmapper/server/internal/platform/httprequest"
+	"modmapper/server/internal/platform/httpresponse"
 )
 
 type Handler struct {
@@ -23,17 +24,17 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
-	limit, err := readIntQuery(r, "limit", 40)
+	limit, err := httprequest.ReadIntQuery(r, "limit", 40)
 	if err != nil { // error due to Atoi
-		writeJSON(w, http.StatusBadRequest, map[string]string{
+		httpresponse.WriteJSON(w, http.StatusBadRequest, map[string]string{
 			"error": "limit must be an integer",
 		})
 		return
 	}
 
-	offset, err := readIntQuery(r, "offset", 0)
+	offset, err := httprequest.ReadIntQuery(r, "offset", 0)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{
+		httpresponse.WriteJSON(w, http.StatusBadRequest, map[string]string{
 			"error": "offset must be an integer",
 		})
 		return
@@ -47,13 +48,13 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidPagination):
-			writeJSON(w, http.StatusBadRequest, map[string]string{
+			httpresponse.WriteJSON(w, http.StatusBadRequest, map[string]string{
 				"error": err.Error(),
 			})
 
 		case errors.Is(err, context.DeadlineExceeded):
 			log.Printf("university lookup timed out: %v", err)
-			writeJSON(w, http.StatusServiceUnavailable, map[string]string{
+			httpresponse.WriteJSON(w, http.StatusServiceUnavailable, map[string]string{
 				"error": "university lookup timed out",
 			})
 
@@ -63,7 +64,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 
 		default:
 			log.Printf("failed to list universities: %v", err)
-			writeJSON(w, http.StatusInternalServerError, map[string]string{
+			httpresponse.WriteJSON(w, http.StatusInternalServerError, map[string]string{
 				"error": "failed to retrieve universities",
 			})
 		}
@@ -71,27 +72,5 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, universities)
-}
-
-func readIntQuery(
-	r *http.Request,
-	key string,
-	defaultValue int,
-) (int, error) {
-	value := r.URL.Query().Get(key)
-	if value == "" {
-		return defaultValue, nil
-	}
-
-	return strconv.Atoi(value)
-}
-
-func writeJSON(w http.ResponseWriter, status int, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("failed to write JSON response: %v", err)
-	}
+	httpresponse.WriteJSON(w, http.StatusOK, universities)
 }
